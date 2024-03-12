@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>
+        <span>Author id: {{details.author_id}}</span>
+        <br>
+        <span>Created at: {{details.created_at}}</span>
+        <br>
+        {%if details.updated_at == details.created_at %}
+        <span> Updated: False </span>
+        {%else%}
+        <span>Updated: True </span>
+        <br>
+        <span>{{details.updated_at}}</span>
+        {%endif%}
+    </div>
+</body>
+</html>
