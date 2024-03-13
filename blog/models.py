@@ -23,7 +23,7 @@ class Category(models.Model):
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Name: {self.name}. Description: {self.description}"
+        return f"Id: {self.pk}. Name: {self.name}"
 
 
 class Post(models.Model):
@@ -43,8 +43,11 @@ class Post(models.Model):
     def is_updated(self):
         return self.created_at != self.updated_at
 
+    # def __str__(self):
+    #     return f"{self.pk},{self.title}"
+
     def __str__(self):
-        return f"{self.pk},{self.title}"
+        return f"{self.pk}"
 
     class Meta:
         db_table = 'posts'
