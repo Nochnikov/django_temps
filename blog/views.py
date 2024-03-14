@@ -1,29 +1,48 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView
 
 from blog.forms import CreatePostForm, CreateCommentForm
 from blog.models import Post, Comment
-from django.template import loader
 
 
 # Create your views here.
 
 
-def index(request):
-    # print(request.GET)
-    # print(request.GET.get('name', ''))
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'posts'
 
-    posts = Post.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Post.objects.all().order_by("-created_at")
 
-    # template = loader.get_template('blog/index.html')
+    # def get(self, request):
+    #     posts = Post.objects.all().order_by('-created_at')
+    #
+    #     context = {
+    #         'posts': posts
+    #     }
+    #
+    #     return render(request, 'blog/index.html', context)
 
-    context = {
-        'posts': posts
-    }
 
-    return render(request, 'blog/index.html', context)
-    # return HttpResponse(template.render(context, request))
-
+# def index(request):
+# print(request.GET)
+# print(request.GET.get('name', ''))
+#
+# posts = Post.objects.all().order_by('-created_at')
+#
+# template = loader.get_template('blog/index.html')
+#
+# context = {
+#     'posts': posts
+# }
+#
+# return render(request, 'blog/index.html', context)
+# return HttpResponse(template.render(context, request))
+#
 
 # def index(request):
 #     # print(request.GET)
@@ -38,76 +57,98 @@ def index(request):
 #     return HttpResponse(response)
 
 
-def detail(request, post_id):
-    details = Post.objects.get(id=post_id)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/details.html'
+    context_object_name = 'details'
 
-    comments = Post.objects.get(comments__post=post_id)
-
-    if comments is not None:
-        pass
-    else:
-        comments = 'No comments yet'
-
-    context = {
-        'details': details,
-        'comments': comments
-    }
-
-    return render(request, template_name='blog/details.html', context=context)
-
-    # return HttpResponse(f"<h1>id {p.id}, {p.title}</h1>"
-    #                     f"<p>{p.content}</p>")
+    def get_object(self, queryset=None):
+        post_id = self.kwargs.get('pk')
+        return Post.objects.get(pk=post_id)
 
 
-def create_comment(request):
+# def detail(request, post_id):
+#     details = Post.objects.get(id=post_id)
+#
+#     context = {
+#         'details': details,
+#     }
+#
+#     return render(request, template_name='blog/details.html', context=context)
 
-    if request.method == 'POST':
-        form = CreateCommentForm(request.POST)
-
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author_id = 1
-            post.save()
-            return redirect('index')
-        else:
-            return HttpResponse('Unexpected error')
-
-    context = {
-        'form': CreateCommentForm()
-    }
-
-    return render(request, 'blog/comments.html', context=context)
+# return HttpResponse(f"<h1>id {p.id}, {p.title}</h1>"
+#                     f"<p>{p.content}</p>")
 
 
-def new_post(request):
-    if request.method == 'POST':
-        # title = request.POST.get('title')
-        # content = request.POST.get('content')
-        #
-        # new_post = Post(
-        #     title=title,
-        #     content=content,
-        #     author_id=1
-        # )
-        # new_post.save()
-        form = CreatePostForm(request.POST)
+class CommentCreateView(CreateView):
+    template_name = 'blog/comments.html'
+    success_url = reverse_lazy('index')
+    form_class = CreateCommentForm
 
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author_id = 1
+    def form_valid(self, form):
+        form.instance.author_id = 1
+        return super().form_valid(form)
 
-            # post.save_m2m()?
-            post.save()
+# def create_comment(request):
+#     if request.method == 'POST':
+#         form = CreateCommentForm(request.POST)
+#
+#         if form.is_valid():
+#             post = form.save(commit=False)
+#             post.author_id = 1
+#             post.save()
+#             return redirect('index')
+#         else:
+#             return HttpResponse('Unexpected error')
+#
+#     context = {
+#         'form': CreateCommentForm()
+#     }
+#
+#     return render(request, 'blog/comments.html', context=context)
 
-            return redirect("index")
-        else:
-            return HttpResponse('Error creating')
 
-    context = {
-        'form': CreatePostForm()
-    }
+class PostCreateView(CreateView):
+    model = Post
+    template_name = 'blog/create_new_post.html'
+    success_url = reverse_lazy('index')
+    form_class = CreatePostForm
 
-    return render(request, 'blog/create_new_post.html', context=context)
+    def form_valid(self, form):
+        print('form instance', form.instance.id)
+        form.instance.author_id = 1
+        return super().form_valid(form)
+
+
+# def new_post(request):
+#     if request.method == 'POST':
+#         # title = request.POST.get('title')
+#         # content = request.POST.get('content')
+#         #
+#         # new_post = Post(
+#         #     title=title,
+#         #     content=content,
+#         #     author_id=1
+#         # )
+#         # new_post.save()
+#         form = CreatePostForm(request.POST)
+#
+#         if form.is_valid():
+#             post = form.save(commit=False)
+#             post.author_id = 1
+#
+#             # post.save_m2m()?
+#             post.save()
+#
+#             return redirect("index")
+#         else:
+#             return HttpResponse('Error creating')
+#
+#     context = {
+#         'form': CreatePostForm()
+#     }
+#
+#     return render(request, 'blog/create_new_post.html', context=context)
 
 # def posts(request):
 #

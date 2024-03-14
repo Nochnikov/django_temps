@@ -43,11 +43,11 @@ class Post(models.Model):
     def is_updated(self):
         return self.created_at != self.updated_at
 
-    # def __str__(self):
-    #     return f"{self.pk},{self.title}"
-
     def __str__(self):
-        return f"{self.pk}"
+        return f"{self.pk},{self.title}"
+
+    # def __str__(self):
+    #     return f"{self.pk}"
 
     class Meta:
         db_table = 'posts'
@@ -83,8 +83,6 @@ class Comment(models.Model):
 class TestUser(models.Model):
     name = models.CharField(max_length=30)
     age = models.IntegerField(default=18)
-
-
 
     def __str__(self):
         return f"{self.name}"

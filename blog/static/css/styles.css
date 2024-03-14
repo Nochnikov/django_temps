@@ -1,3 +1,8 @@
+body {
+    background-color:  #faebd9
+
+}
+
 div {
     background-color: #faebd7;
     max-width: 500px;
@@ -10,4 +15,9 @@ div {
 
 button {
     background-color: green;
+}
+
+h5{
+    display: flex;
+    justify-content: center;
 }
