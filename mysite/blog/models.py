@@ -22,7 +22,7 @@ class Post(models.Model):
 
     title = models.CharField(max_length=200, db_index=True)
     content = models.TextField(blank=True, null=True)
-
+    photo = models.ImageField(upload_to="images/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     categories = models.ManyToManyField(Category)

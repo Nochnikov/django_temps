@@ -2,7 +2,7 @@ from django.forms import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework import generics
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from blog.serializers import PostSerializer, CommentSerializer
@@ -19,83 +19,121 @@ from blog.models import Post, Comment
 # и такое существует
 
 
-class PostDetailView(generics.RetrieveAPIView):
+# class PostDetailView(generics.RetrieveAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#     lookup_field = 'pk'
+#
+#
+# class PostCreateView(generics.CreateAPIView):
+#     serializer_class = PostSerializer
+#
+#     def perform_create(self, serializer):
+#         title = serializer.validated_data.get('title')
+#         content = serializer.validated_data.get('content', None)
+#
+#         if content == "":
+#             content = title
+#
+#         serializer.save(author_id=1, content=content)
+#
+#
+# class PostListView(generics.ListAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#
+#
+# class PostListCreateView(generics.ListCreateAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#
+#     def perform_create(self, serializer):
+#         serializer.save(author_id=1)
+#
+#
+# class PostUpdateView(generics.UpdateAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#     lookup_field = 'pk'
+#
+#     # def perform_update(self, serializer):
+#     #     pass
+#
+#
+# class PostDeleteView(generics.DestroyAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#     lookup_field = 'pk'
+
+
+class PostCRUDView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin
+):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    lookup_field = 'pk'
 
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        if pk:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
 
-class PostCreateView(generics.CreateAPIView):
-    serializer_class = PostSerializer
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        if pk:
+            return self.update(request, *args, **kwargs)
+        return self.create(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        title = serializer.validated_data.get('title')
-        content = serializer.validated_data.get('content', None)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
-        if content == "":
-            content = title
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-        serializer.save(author_id=1, content=content)
-
-
-class PostListView(generics.ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-
-class PostListCreateView(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    def patch(self, request, *args, **kwargs):
+        # kwargs['partial'] = True
+        # return self.update(request, *args, **kwargs)
+        return self.partial_update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(author_id=1)
 
 
-class PostUpdateView(generics.UpdateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    lookup_field = 'pk'
+# class CommentCreateView(generics.CreateAPIView):
+#     serializer_class = CommentSerializer
+#
+#     def perform_create(self, serializer):
+#         content = serializer.validated_data.get("content")
+#
+#         serializer.save(author_id=1)
+#
+#
+# class CommentDetailView(generics.RetrieveAPIView):
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#     lookup_field = 'pk'
+#
+#
+# class CommentListView(generics.ListAPIView):
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#
+#
+# class CommentUpdateView(generics.UpdateAPIView):
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#     lookup_field = 'pk'
+#
 
-    # def perform_update(self, serializer):
-    #     pass
-
-
-class PostDeleteView(generics.DestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    lookup_field = 'pk'
-
-
-class CommentCreateView(generics.CreateAPIView):
-    serializer_class = CommentSerializer
-
-    def perform_create(self, serializer):
-        content = serializer.validated_data.get("content")
-
-        serializer.save(author_id=1)
-
-
-class CommentDetailView(generics.RetrieveAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    lookup_field = 'pk'
-
-
-class CommentListView(generics.ListAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-
-class CommentUpdateView(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    lookup_field = 'pk'
-
-
-class CommentDeleteView(generics.DestroyAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    lookup_field = 'pk'
+# class CommentDeleteView(generics.DestroyAPIView):
+#     queryset = Comment.objects.all()
+#     serializer_class = CommentSerializer
+#     lookup_field = 'pk'
 
 # @api_view(["GET", "POST"])
 # def index(request):
